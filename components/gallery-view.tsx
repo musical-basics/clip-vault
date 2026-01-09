@@ -122,13 +122,14 @@ interface AnalyzedClip {
 }
 
 export function GalleryView() {
+  const [assets, setAssets] = useState<VideoAsset[]>(sampleAssets)
   const [searchQuery, setSearchQuery] = useState("")
   const [gridSize, setGridSize] = useState<"compact" | "comfortable">("comfortable")
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [uploadState, setUploadState] = useState<UploadState>("idle")
   const [analyzedClip, setAnalyzedClip] = useState<AnalyzedClip | null>(null)
 
-  const filteredAssets = sampleAssets.filter(
+  const filteredAssets = assets.filter(
     (asset) =>
       asset.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       asset.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -178,6 +179,21 @@ export function GalleryView() {
   const handleAddToCollection = () => {
     setUploadState("idle")
     setAnalyzedClip(null)
+    setShowUploadModal(false)
+  }
+
+  const handleImportCalls = (files: any[]) => {
+    const newAssets: VideoAsset[] = files.map((file, i) => ({
+      id: `local-${Date.now()}-${i}`,
+      title: file.name,
+      description: "Imported Local Clip",
+      thumbnail: "/placeholder.jpg", // We need to generate these later
+      duration: "0:00",
+      tags: ["imported", "local"],
+      path: file.path // Store the real path!
+    }))
+
+    setAssets(prev => [...newAssets, ...prev])
     setShowUploadModal(false)
   }
 
@@ -300,7 +316,7 @@ export function GalleryView() {
             </div>
 
             <div className="mb-6">
-              <FileIngest />
+              <FileIngest onImport={handleImportCalls} />
             </div>
 
             {/* Drop Zone - Idle/Dragging State */}
