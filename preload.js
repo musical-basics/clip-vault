@@ -5,5 +5,9 @@ contextBridge.exposeInMainWorld('electron', {
     selectFolder: () => ipcRenderer.invoke('dialog:openDirectory'),
 
     // Listen for the results of the scan
-    onFolderSelected: (callback) => ipcRenderer.on('folder-selected', callback)
+    // Listen for the results of the scan
+    onFolderSelected: (callback) => ipcRenderer.on('folder-selected', callback),
+
+    // Process a single video file
+    processVideo: (filePath) => ipcRenderer.invoke('video:process', filePath)
 });

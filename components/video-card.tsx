@@ -13,6 +13,7 @@ export interface VideoAsset {
   duration: string
   isSignature?: boolean
   tags?: string[]
+  path?: string // Local file path for Electron processing
 }
 
 interface VideoCardProps {
@@ -28,7 +29,7 @@ export function VideoCard({ asset, aspectRatio = "landscape", onClick }: VideoCa
   const handleMouseEnter = () => {
     setIsHovered(true)
     if (videoRef.current) {
-      videoRef.current.play().catch(() => {})
+      videoRef.current.play().catch(() => { })
     }
   }
 

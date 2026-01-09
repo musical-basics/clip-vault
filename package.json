@@ -46,6 +46,9 @@
     "cmdk": "1.0.4",
     "date-fns": "4.1.0",
     "embla-carousel-react": "8.5.1",
+    "ffmpeg-static": "^5.3.0",
+    "ffprobe-static": "^3.1.0",
+    "fluent-ffmpeg": "^2.1.3",
     "input-otp": "1.4.1",
     "lucide-react": "^0.454.0",
     "next": "16.0.10",
@@ -79,7 +82,9 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "electron",
-      "sharp"
+      "sharp",
+      "ffmpeg-static",
+      "ffprobe-static"
     ]
   }
 }

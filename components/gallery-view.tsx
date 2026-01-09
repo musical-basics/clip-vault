@@ -182,19 +182,56 @@ export function GalleryView() {
     setShowUploadModal(false)
   }
 
-  const handleImportCalls = (files: any[]) => {
+  const handleImportCalls = async (files: any[]) => {
+    // 1. Create initial asset objects (with placeholder data)
     const newAssets: VideoAsset[] = files.map((file, i) => ({
       id: `local-${Date.now()}-${i}`,
       title: file.name,
-      description: "Imported Local Clip",
-      thumbnail: "/placeholder.jpg", // We need to generate these later
-      duration: "0:00",
+      description: "Processing...",
+      thumbnail: "/placeholder.jpg",
+      duration: "--:--",
       tags: ["imported", "local"],
-      path: file.path // Store the real path!
+      path: file.path,
+      // CRITICAL FIX: Add the media:// protocol so the video player can actually read it
+      videoUrl: `media://${file.path}`
     }))
 
+    // 2. Add to state immediately so user sees them
     setAssets(prev => [...newAssets, ...prev])
     setShowUploadModal(false)
+
+    // 3. Process them one by one (get real thumbnail + duration)
+    if (window.electron) {
+      for (const asset of newAssets) {
+        try {
+          // Call the Electron backend
+          const metadata = await window.electron.processVideo(asset.path!)
+
+          // Update the asset in state with real data
+          setAssets(currentAssets =>
+            currentAssets.map(a =>
+              a.id === asset.id
+                ? {
+                  ...a,
+                  duration: metadata.duration,
+                  thumbnail: metadata.thumbnailPath.replace('file://', 'media://'),
+                  description: "Ready"
+                }
+                : a
+            )
+          )
+        } catch (error) {
+          console.error("Failed to process video", error)
+          setAssets(currentAssets =>
+            currentAssets.map(a =>
+              a.id === asset.id
+                ? { ...a, description: "Analysis Failed" }
+                : a
+            )
+          )
+        }
+      }
+    }
   }
 
   const closeModal = () => {
