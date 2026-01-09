@@ -21,6 +21,20 @@ function createWindow() {
   mainWindow.loadURL(startUrl);
 }
 
+// Register privileges for the custom 'media' scheme
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: 'media',
+    privileges: {
+      secure: true,
+      standard: true,
+      supportFetchAPI: true,
+      stream: true,
+      bypassCSP: true
+    }
+  }
+]);
+
 // --- IPC HANDLERS (The "Backend" Logic) ---
 
 // 1. Listen for the "Open Folder" click
@@ -114,11 +128,16 @@ ipcMain.handle('video:process', async (event, filePath) => {
 
 app.whenReady().then(() => {
   // Register 'media' protocol to handle local file requests
-  protocol.handle('media', (request) => {
-    const filePath = request.url.replace('media://', '');
-    // Handle Windows paths vs Unix paths if needed, usually decodeURIComponent is enough
-    const decodedPath = decodeURIComponent(filePath);
-    return net.fetch('file://' + decodedPath);
+  // Use registerFileProtocol instead of handle for better video streaming support (Range requests)
+  protocol.registerFileProtocol('media', (request, callback) => {
+    const url = request.url.replace('media://', '');
+    const decodedPath = decodeURIComponent(url);
+    // console.log("Media Request:", decodedPath); // Debugging
+    try {
+      callback(decodedPath);
+    } catch (error) {
+      console.error('Media protocol error:', error);
+    }
   });
 
   createWindow();

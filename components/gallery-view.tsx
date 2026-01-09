@@ -4,6 +4,7 @@ import type React from "react"
 
 import { useState, useCallback } from "react"
 import { VideoCard, type VideoAsset } from "@/components/video-card"
+import { VideoPlayer } from "@/components/video-player"
 import { FileIngest } from "@/components/file-ingest"
 import { Search, SlidersHorizontal, Grid3X3, LayoutGrid, Upload, Sparkles, Check, Tag, X } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -128,6 +129,7 @@ export function GalleryView() {
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [uploadState, setUploadState] = useState<UploadState>("idle")
   const [analyzedClip, setAnalyzedClip] = useState<AnalyzedClip | null>(null)
+  const [playingFile, setPlayingFile] = useState<string | null>(null)
 
   const filteredAssets = assets.filter(
     (asset) =>
@@ -319,6 +321,7 @@ export function GalleryView() {
               key={asset.id}
               asset={asset}
               aspectRatio={gridSize === "compact" ? "square" : getAspectRatio(index)}
+              onClick={() => setPlayingFile(asset.path || null)}
             />
           ))}
         </div>
@@ -513,6 +516,14 @@ export function GalleryView() {
             )}
           </div>
         </div>
+      )}
+
+      {/* Video Player Overlay */}
+      {playingFile && (
+        <VideoPlayer
+          src={`media://${playingFile}`}
+          onClose={() => setPlayingFile(null)}
+        />
       )}
     </div>
   )
